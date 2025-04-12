@@ -32,8 +32,15 @@ export default function DashboardEnseignant() {
   
   // État pour les heures
   const [heures, setHeures] = useState(() => {
-    const savedHeures = localStorage.getItem("heures");
-    return savedHeures ? JSON.parse(savedHeures) : [{
+    if (typeof window !== 'undefined') {
+      const savedHeures = localStorage.getItem("heures");
+      return savedHeures ? JSON.parse(savedHeures) : [{
+        date: "", debut: "", fin: "", niveau: "",
+        specialite: "", groupe: "", module: "",
+        type: "", sujet: ""
+      }];
+    }
+    return [{
       date: "", debut: "", fin: "", niveau: "",
       specialite: "", groupe: "", module: "",
       type: "", sujet: ""

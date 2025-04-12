@@ -35,13 +35,13 @@ const menuItems = [
       items: [
         {
           icon: "/images/2849830_multimedia_options_setting_settings_gear_icon.png",
-           label: "Settings",
+           label: "Paramétres",
            href: "/Settings",
            visible: ["admin", "teacher", "student", "parent"],
          },
         {
          icon: "/images/logout.png",
-          label: "Logout",
+          label: "Se deconnecter",
           href: "/logout",
           visible: ["admin", "teacher", "student", "parent"],
         },

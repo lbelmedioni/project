@@ -11,9 +11,9 @@ export default function AuthPage() {
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [status, setStatus] = useState(null);
   const router = useRouter();
@@ -54,45 +54,51 @@ export default function AuthPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setStatus("Les mots de passe ne correspondent pas.");
+      setTimeout(() => setStatus(null), 4000);
+      return;
+    }
+
     try {
+      const bodyData = isLogin
+        ? { email: formData.email, password: formData.password, userType }
+        : {
+            email: formData.email,
+            password: formData.password,
+            university: selectedUniversity,
+            faculty: selectedFaculty,
+          };
+
       const response = await fetch(`/api/auth/${isLogin ? 'login' : 'register'}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          university: selectedUniversity,
-          faculty: selectedFaculty,
-          userType: userType
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
       });
+
       const data = await response.json();
-  
+
       if (response.ok) {
         localStorage.setItem('userId', data.id);
-        localStorage.setItem('university', selectedUniversity);
-        localStorage.setItem('faculty', selectedFaculty);
+        localStorage.setItem('userType', data.userType || 'enseignant');
+        localStorage.setItem('university', data.university || selectedUniversity);
+        localStorage.setItem('faculty', data.faculty || selectedFaculty);
         localStorage.setItem('status', data.status);
-        localStorage.setItem('userType', data.userType);
-  
-        // Redirection selon le type d'utilisateur et le statut
+
         if (data.status === 'validated') {
-          if (data.userType === 'enseignant') {
-            router.push('/DashbordEns');
-          } else if (data.userType === 'chef_departement') {
-            router.push('/DashbordChef');
-          }
+          if (data.userType === 'enseignant') router.push('/DashbordEns');
+          else if (data.userType === 'chef_departement') router.push('/DashbordChef');
         } else if (data.status === 'pending') {
           router.push('/auth/pending');
         }
       } else {
-        setStatus(data.message || 'Erreur lors de l\\\'authentification');
+        setStatus(data.message || "Erreur d'authentification.");
         setTimeout(() => setStatus(null), 5000);
       }
     } catch (error) {
       console.error('Erreur :', error);
-      setStatus('Erreur lors de l\\\'authentification');
+      setStatus("Erreur de connexion au serveur.");
       setTimeout(() => setStatus(null), 5000);
     }
   };
@@ -104,7 +110,9 @@ export default function AuthPage() {
         <div className="w-1/2 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-green-500/10 to-green-700/10 min-h-[500px]">
           <h2 className="text-2xl font-bold text-green-700 text-center mb-4">Bienvenue sur notre plateforme</h2>
           <p className="text-base text-green-700 text-center mb-6">
-            Connectez-vous pour gérer vos heures de vacation et accéder à vos informations
+            {isLogin
+              ? "Connectez-vous à votre compte"
+              : "Inscrivez-vous pour commencer à suivre vos heures"}
           </p>
           <div className="flex justify-center">
             <button
@@ -119,99 +127,95 @@ export default function AuthPage() {
         {/* Partie droite */}
         <div className="w-1/2 flex flex-col items-center justify-center p-8 min-h-[500px]">
           <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
-            <div className="w-full">
-              <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Nom d'utilisateur"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
-                required
-              />
-            </div>
+            {/* Email */}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none"
+            />
 
-            <div className="w-full">
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
-                required
-              />
-            </div>
+            {/* Password */}
+            <input
+              type="password"
+              name="password"
+              placeholder="Mot de passe"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none"
+            />
 
-            <div className="w-full">
+            {/* Confirm Password (only for signup) */}
+            {!isLogin && (
               <input
                 type="password"
-                id="password"
-                name="password"
-                placeholder="Mot de passe"
-                value={formData.password}
+                name="confirmPassword"
+                placeholder="Confirmer le mot de passe"
+                value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
                 required
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none"
               />
-            </div>
+            )}
 
+            {/* UserType (only login) */}
+            {isLogin && (
+              <select
+                value={userType}
+                onChange={(e) => setUserType(e.target.value)}
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none"
+                required
+              >
+                <option value="">Type d'utilisateur</option>
+                <option value="enseignant">Enseignant</option>
+                <option value="chef_departement">Chef de département</option>
+              </select>
+            )}
+
+            {/* University + Faculty (only signup) */}
             {!isLogin && (
-              <div className="space-y-4 w-full">
+              <>
                 <select
-                  id="userType"
-                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
-                  value={userType}
-                  onChange={(e) => setUserType(e.target.value)}
-                  required
-                >
-                  <option value="">Type d'utilisateur</option>
-                  <option value="enseignant">Enseignant</option>
-                  <option value="chef_departement">Chef de département</option>
-                </select>
-
-                <select
-                  id="university"
-                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
                   onChange={handleUniversityChange}
                   value={selectedUniversity}
+                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2"
                   required
                 >
                   <option value="">Université</option>
-                  {universities.map((univ) => (
-                    <option key={univ.name} value={univ.name}>{univ.name}</option>
+                  {universities.map((u) => (
+                    <option key={u.name} value={u.name}>{u.name}</option>
                   ))}
                 </select>
 
                 <select
-                  id="faculty"
-                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2 focus:ring-green-700/20 outline-none transition-all duration-200"
                   onChange={handleFacultyChange}
                   value={selectedFaculty}
+                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-green-700 focus:ring-2"
                   disabled={!faculties.length}
                   required
                 >
                   <option value="">Faculté</option>
-                  {faculties.map((fac) => (
-                    <option key={fac.name} value={fac.name}>{fac.name}</option>
+                  {faculties.map((f) => (
+                    <option key={f.name} value={f.name}>{f.name}</option>
                   ))}
                 </select>
-              </div>
+              </>
             )}
 
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-green-700 text-white rounded-xl hover:bg-green-900 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/20"
-              >
-                {isLogin ? 'Se connecter' : 'Créer un compte'}
-              </button>
-            </div>
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-green-700 text-white rounded-xl hover:bg-green-900 transition duration-300 transform hover:scale-105"
+            >
+              {isLogin ? 'Se connecter' : 'Créer un compte'}
+            </button>
 
             {status && (
-              <div className="mt-3 p-3 text-red-600 bg-red-50/90 rounded-xl border border-red-200 w-full">
+              <div className="mt-3 p-3 text-red-600 bg-red-50 rounded-xl border border-red-200">
                 {status}
               </div>
             )}
