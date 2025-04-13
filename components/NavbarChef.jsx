@@ -29,7 +29,7 @@ export default function NavbarChef() {
             priority
           />
         </button>
-        <Link href="/Profile" className="flex flex-col cursor-pointer group">
+        <Link href="/chef/profile" className="flex flex-col cursor-pointer group">
           <span className="text-xs leading-3 font-medium text-gray-800 group-hover:text-green-600">
             {`${chef.nom} ${chef.prenom}`}
           </span>

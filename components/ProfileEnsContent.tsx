@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,33 +13,23 @@ interface ProfileData {
   dateNaissance: string;
 }
 
-export default function ProfileChefContent() {
+export default function ProfileEnsContent() {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('chefData');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setProfileData(parsedData);
-      } catch (error) {
-        console.error('Error parsing data:', error);
-      }
+    const data = localStorage.getItem("enseignantData");
+    if (data) {
+      setProfileData(JSON.parse(data));
     }
   }, []);
 
   if (!profileData) {
-    return (
-      <div className="p-6 text-center text-gray-600">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-        Chargement des données...
-      </div>
-    );
+    return <div className="p-6 text-center text-gray-600">Chargement des données...</div>;
   }
 
   return (
     <div className="w-full max-w-screen-xl mx-auto bg-white shadow-lg rounded-xl">
-      {/* Header */}
+      {/* Header Section */}
       <div className="px-6 py-8 border-b">
         <div className="flex items-center gap-4">
           <Image 
@@ -56,7 +45,7 @@ export default function ProfileChefContent() {
         </div>
       </div>
 
-      {/* Profile Infos */}
+      {/* Profile Content */}
       <div className="px-6 py-8">
         <div className="grid grid-cols-1 gap-8">
           <Card className="relative overflow-hidden">
@@ -78,4 +67,3 @@ export default function ProfileChefContent() {
     </div>
   )
 }
-

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname(); // Récupérer le chemin actuel
-  const isAuthPage = ["/auth/authEns", "/auth/authAdmin" , "/DashbordEns" ,"/admin" , "/DashboardAdm/adminUniv" ,"/Profile" ,"/Settings" , "/DashboardAdm/adminChef" , "/DashboardChef" , "/DashboardChef/ListeEns", "/DashboardChef/Heures" , "/DashboardChef/Inscription" , "/auth/completProfile"].includes(pathname); // Ajout de /admin/login
+  const isAuthPage = ["/auth/authEns", "/auth/authAdmin" , "/DashbordEns" ,"/admin" , "/DashboardAdm/adminUniv"  ,"/Settings" , "/DashboardAdm/adminChef" , "/DashboardChef" , "/DashboardChef/ListeEns", "/DashboardChef/Heures" , "/DashboardChef/Inscription" , "/auth/completProfile" , "/chef/profile" , "/ProfileEns" , "/SettingsEns" , "/SettingsChef"].includes(pathname); // Ajout de /admin/login
 
   return (
     <html lang="fr">
